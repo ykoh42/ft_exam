@@ -6,7 +6,7 @@
 /*   By: ykoh <ykoh@student.42seoul.kr>             +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/02/01 15:44:11 by ykoh              #+#    #+#             */
-/*   Updated: 2021/02/01 15:44:23 by ykoh             ###   ########.fr       */
+/*   Updated: 2021/02/01 16:43:23 by ykoh             ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,13 +14,14 @@
 
 char	*ft_strchr(const char *s, int c)
 {
-	while (*s)
+	while (1)
 	{
 		if (*s == c)
 			return ((char *)s);
+		if (*s == '\0')
+			return (NULL);
 		s++;
 	}
-	return (NULL);
 }
 
 int		main(int argc, char *argv[])

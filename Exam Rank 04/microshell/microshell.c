@@ -1,11 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
-size_t		ft_strlen(const char *s)
+int		ft_strlen(char *s)
 {
-	size_t	i;
+	int	i;
 
 	i = 0;
 	while (s[i])
@@ -13,35 +12,10 @@ size_t		ft_strlen(const char *s)
 	return (i);
 }
 
-int			ft_cd(char *argv[])
-{
-	int	i;
-
-	i = 0;
-	while (argv[i])
-		i++;
-	if (i != 2)
-	{
-		write(2, "error: cd: bad arguments\n", 25);
-		return (-1);
-	}
-	else
-	{
-		if (chdir(argv[1]) < 0)
-		{
-			write(2, "error: cd: cannot change directory to ", 38);
-			write(2, argv[1], ft_strlen(argv[1]));
-			write(2, "\n", 1);
-			return (-1);
-		}
-	}
-	return (0);
-}
-
-int			is_pipe(char *argv[])
+int		is_pipe(char *argv[])
 {
 	int	ret;
-	int i;
+	int	i;
 
 	ret = 0;
 	i = 0;
@@ -53,7 +27,7 @@ int			is_pipe(char *argv[])
 			argv[i] = 0;
 			break ;
 		}
-		else if (strncmp(argv[i], ";", 2) == 0)
+		if (strncmp(argv[i], ";", 2) == 0)
 		{
 			ret = 0;
 			argv[i] = 0;
@@ -64,12 +38,34 @@ int			is_pipe(char *argv[])
 	return (ret);
 }
 
-void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
+int		ft_cd(char *argv[])
+{
+	int	i;
+
+	i = 0;
+	while (argv[i])
+		i++;
+	if (i != 2)
+	{
+		write(2, "error: cd: bad arguments\n", 25);
+		return (-1);
+	}
+	if (chdir(argv[1]) < 0)
+	{
+		write(2, "error: cd: cannot change directory to ", 38);
+		write(2, argv[1], ft_strlen(argv[1]));
+		write(2, "\n", 1);
+		return (-1);
+	}
+	return (0);
+}
+
+void	command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 {
 	int		exit_status;
-	int 	i;
+	int		i;
 	int		next;
-	int 	fd_next[2];
+	int		fd_next[2];
 	pid_t	pid;
 
 	if (argc <= 1)
@@ -77,13 +73,10 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 	next = is_pipe(argv);
 	if (argv[0])
 	{
-		if (next)
+		if (next && pipe(fd_next) < 0)
 		{
-			if (pipe(fd_next) < 0)
-			{
-				write(2, "error: fatal\n", 13);
-				exit(1);
-			}
+			write(2, "error: fatal\n", 13);
+			exit(1);
 		}
 		if (strncmp(argv[0], "cd", 3) == 0)
 			ft_cd(argv);
@@ -94,22 +87,10 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 		}
 		else if (pid == 0)
 		{
-			if (prev)
-			{
-				if (dup2(fd_prev[0], 0) < 0)
-				{
-					write(2, "error: fatal\n", 13);
-					exit(1);
-				}
-			}
-			if (next)
-			{
-				if (dup2(fd_next[1], 1) < 0)
-				{
-					write(2, "error: fatal\n", 13);
-					exit(1);
-				}
-			}
+			if (prev && dup2(fd_prev[0], 0) < 0)
+				exit(-1);
+			if (next && dup2(fd_next[1], 1) < 0)
+				exit(-1);
 			if (execve(argv[0], argv, envp) < 0)
 			{
 				write(2, "error: cannot execute ", 22);
@@ -121,7 +102,10 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 		{
 			waitpid(pid, &exit_status, 0);
 			if (exit_status / 256 == 255)
+			{
+				write(2, "error: fatal\n", 13);
 				exit(1);
+			}
 			if (prev)
 				close(fd_prev[0]);
 			if (next)
@@ -134,11 +118,11 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 	command(argc - 1 - i, argv + 1 + i, envp, next, fd_next);
 }
 
-int			main(int argc, char *argv[], char *envp[])
+int 	main(int argc, char *argv[], char *envp[])
 {
 	int	prev;
 	int	fd_prev[2];
-	
+
 	prev = 0;
 	fd_prev[0] = 0;
 	fd_prev[1] = 1;
@@ -146,4 +130,3 @@ int			main(int argc, char *argv[], char *envp[])
 	// while (1);
 	return (0);
 }
-

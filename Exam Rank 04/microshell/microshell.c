@@ -81,7 +81,7 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 		{
 			if (pipe(fd_next) < 0)
 			{
-				write(2, "error fatal\n", 12);
+				write(2, "error: fatal\n", 13);
 				exit(1);
 			}
 		}
@@ -89,7 +89,7 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 			ft_cd(argv);
 		else if ((pid = fork()) < 0)
 		{
-			write(2, "error fatal\n", 12);
+			write(2, "error: fatal\n", 13);
 			exit(1);
 		}
 		else if (pid == 0)
@@ -98,16 +98,16 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 			{
 				if (dup2(fd_prev[0], 0) < 0)
 				{
-					write(2, "error fatal\n", 12);
-					exit(-1);
+					write(2, "error: fatal\n", 13);
+					exit(1);
 				}
 			}
 			if (next)
 			{
 				if (dup2(fd_next[1], 1) < 0)
 				{
-					write(2, "error fatal\n", 12);
-					exit(-1);
+					write(2, "error: fatal\n", 13);
+					exit(1);
 				}
 			}
 			if (execve(argv[0], argv, envp) < 0)

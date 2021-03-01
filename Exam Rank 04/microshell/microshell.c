@@ -2,13 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-#include <fcntl.h>
-
-#ifdef TEST_SH
-# define TEST		1
-#else
-# define TEST		0
-#endif
 
 size_t		ft_strlen(const char *s)
 {
@@ -82,16 +75,16 @@ void		command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 	if (argc <= 1)
 		return ;
 	next = is_pipe(argv);
-	if (argv[0] && next)
-	{
-		if (pipe(fd_next) < 0)
-		{
-			write(2, "error fatal\n", 12);
-			exit(1);
-		}
-	}
 	if (argv[0])
 	{
+		if (next)
+		{
+			if (pipe(fd_next) < 0)
+			{
+				write(2, "error fatal\n", 12);
+				exit(1);
+			}
+		}
 		if (strncmp(argv[0], "cd", 3) == 0)
 			ft_cd(argv);
 		else if ((pid = fork()) < 0)
@@ -151,9 +144,6 @@ int			main(int argc, char *argv[], char *envp[])
 	fd_prev[1] = 1;
 	command(argc, argv + 1, envp, prev, fd_prev);
 	// while (1);
-
-	if (TEST)
-		while (1);
 	return (0);
 }
 

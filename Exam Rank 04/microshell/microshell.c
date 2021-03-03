@@ -96,11 +96,16 @@ void	command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 				write(2, "error: cannot execute ", 22);
 				write(2, argv[0], ft_strlen(argv[0]));
 				write(2, "\n", 1);
+				exit(1);
 			}
 		}
 		else
 		{
-			waitpid(pid, &exit_status, 0);
+			if (waitpid(pid, &exit_status, 0) < 0)
+			{
+				write(2, "error: fatal\n", 13);
+				exit(1);				
+			}
 			if (exit_status / 256 == 255)
 			{
 				write(2, "error: fatal\n", 13);

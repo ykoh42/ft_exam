@@ -104,7 +104,7 @@ void	command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 			if (waitpid(pid, &exit_status, 0) < 0)
 			{
 				write(2, "error: fatal\n", 13);
-				exit(1);				
+				exit(1);
 			}
 			if (exit_status / 256 == 255)
 			{
@@ -123,7 +123,7 @@ void	command(int argc, char *argv[], char *envp[], int prev, int *fd_prev)
 	command(argc - 1 - i, argv + 1 + i, envp, next, fd_next);
 }
 
-int 	main(int argc, char *argv[], char *envp[])
+int		main(int argc, char *argv[], char *envp[])
 {
 	int	prev;
 	int	fd_prev[2];
